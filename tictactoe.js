@@ -1,101 +1,148 @@
-//creating players and the combinations that win the game. The numbers represent the cell number//
-const playerX = "x"
-const playerO = "o"
+//creating the players//
+
+const tiles = document.querySelectorAll(".tile");
+const gatoX = "X";
+const gatoO = "O";
+
+//setting playerX as the starting player, didn't use const because we do want it to change//
+let turn = gatoX;
+let player = "";
+
+//turn header//
+function turnSwap() {
+    if(player == gatoX){
+        player = gatoO;
+        $('#turnSwap').text('Es el turno de Gato X')
+        
+    }else{
+        player = gatoX;
+        $('#turnSwap').text('Es el turno de Gato O')
+    }
+
+}
+
+//tracking where the markers go//
+const boardState = Array(tiles.length);
+boardState.fill(null);
+    //console.log(boardState) -- tested that the tiles were empty//
+
+//getting the elements from the HTML//
+const strike = document.getElementById("strike");
+const gameOverArea = document.getElementById("game-over-area");
+const gameOverText = document.getElementById("game-over-text");
+const playAgain = document.getElementById("play-again");
+playAgain.addEventListener("click", startAgain);
+
+//adding clicks to the tiles//
+tiles.forEach((tile) => tile.addEventListener("click", tileClick));
+
+//function to have pointer hover over a tile//
+function hoveringText() {
+    //removing all the hovers//
+    tiles.forEach((tile) => {
+        tile.classList.remove("x-hover");
+        tile.classList.remove("o-hover");
+    })
+
+    const hoverClass = `${turn.toLowerCase()}-hover`;
+
+    tiles.forEach((tile)=> {
+        if(tile.innerText == "") {
+            tile.classList.add(hoverClass);
+        }
+    })
+}
+
+hoveringText()
+
+//function for clicking on the tile and changing turns between players//
+function tileClick(event) {
+    turnSwap();
+    if (gameOverArea.classList.contains("visible")) {
+        return;
+    }
+    const tile = event.target;
+    const tileNumber = tile.dataset.index;
+    if (tile.innerText !="") {
+        return;
+    }
+    if(turn === gatoX) {
+        tile.innerText = gatoX;
+        boardState[tileNumber-1] = gatoX;
+        turn = gatoO;
+    } else {
+        tile.innerText = gatoO;
+        boardState[tileNumber-1] = gatoO;
+        turn = gatoX;
+    }
+
+    hoveringText();
+    //calling the function that will declare who wins the game//
+    declareWinner();
+}
+
+//need to say the different ways to fill tiles to win//
 const winningCombos = [
-    [0, 1, 2],
-    [3, 4, 5],
-    [6, 7, 8],
-    [0, 3, 6],
-    [1, 4, 7],
-    [2, 5, 8],
-    [0, 4, 8],
-    [2, 4, 6]
-]
+   //combinations for the rows
+    {combo: [1, 2, 3], strikeClass: "strike-row-1"},
+    {combo: [4, 5, 6], strikeClass: "strike-row-2"},
+    {combo: [7, 8, 9], strikeClass: "strike-row-3"},
+    
+    //combos for the columns
+    {combo: [1, 4, 7], strikeClass: "strike-column-1"},
+    {combo: [2, 5, 8], strikeClass: "strike-column-2"},
+    {combo: [3, 6, 9], strikeClass: "strike-column-3"},
 
-//Id'ing all of the elements we need from the html and giving them variables
-const cellElements = document.querySelectorAll('[data-cell]')
-const boardElement = document.getElementById('board')
-const winningMessageElement = document.getElementById('winnerMessage')
-const restartButton = document.getElementById('restartButton')
-const winnerMessageTextElement = document.getElementById('winnerMessageText')
+    //diagonals
+    {combo: [1, 5, 9], strikeClass: "strike-diagonal-1"},
+    {combo: [3, 5, 7], strikeClass: "strike-diagonal-2"},
+];
 
-//Calling the function to start the game
-startTTTGame()
+//this function declares who wins the game and needs to iterate through all the combos. This function is being called w/i the tileClick function.//
+function declareWinner() {
+    //piece to check if there is a winning combination
+    for(const winningCombo of winningCombos) {
+        //console.log(winningCombo); <--was making sure it was working when clicking on the board
 
-//Setting up the restart Button so that when clicked, it restarts the game.
-restartButton.addEventListener('click', startTTTGame)
+        //pulling the winning combo and the strike class from combos above//
+        const {combo, strikeClass} = winningCombo
+        const tileValue1 = boardState[combo[0]-1];
+        const tileValue2 = boardState[combo[1]-1];
+        const tileValue3 = boardState[combo[2]-1];
 
-//function to start the game
-function startTTTGame() {
-    isPlayerO_Turn = false
-    cellElements.forEach(cell => {
-        cell.classList.remove(playerX)
-        cell.classList.remove(playerO)
-        cell.removeEventListener('click', handleCellClick)
-        cell.addEventListener('click', handleCellClick, {once: true})
-    })
-    setBoardHoverClass()
-    winningMessageElement.classList.remove('show')
-}
-
-//function for what to do on the clicks
-function handleCellClick(e) {
-    const cell = e.target
-    const currentClass = isPlayerO_Turn ? playerO : playerX
-    placeMark(cell, currentClass)
-    if (checkWin(currentClass)) {
-        endGame(false)
-    } else if (isDraw()) {
-        endGame(true)
-    } else {
-        swapTurns()
-        setBoardHoverClass()
+        if(tileValue1 != null && 
+            tileValue1 === tileValue2 && 
+            tileValue1 == tileValue3
+        ) {
+            strike.classList.add(strikeClass);
+            gameOver(tileValue1);
+            return;
+        }
+    }
+    //part where need to check for draw//
+    const allTilesFilled = boardState.every((tile) => tile != null);
+    if(allTilesFilled) {
+        gameOver(null);
     }
 }
 
-//function to hover over the board
-function hoverOverBoard() {
-    boardElement.classList.remove(playerX)
-    boardElement.classList.remove(playerO)
-    if (isPlayerO_Turn) {
-        boardElement.classList.add(playerO)
-    } else {
-        boardElement.classList.add(playerX)
+//function to work when the game is over//
+function gameOver(winnerText) {
+    let text = '¡Empate!';
+    if (winnerText != null) {
+        text = `¡El ganador es Gato ${winnerText}!`
     }
+    gameOverArea.className = "visible";
+    gameOverText.innerText = text;
+    gameOverText.setAttribute("class", "alert alert-dark");
 }
 
-//function to check the winner
-function winnerCheck(currentClass) {
-    return winningCombos.some(combination => {
-        return combination.every(index => {
-            return cellElements[index].classList.contains(currentClass)
-        })
-    })
-}
-
-//function to end the game.
-function endGame(draw) {
-    if (draw) {
-        winningMessageElement.innerText = "We have a draw! / ¡Tenemos un empate!"
-    } else {
-        winnerMessageTextElement.innerText = `Player with ${isPlayerO_Turn ? "O's" : "X's"} wins! / El jugador con ${isPlayerO_Turn ? "O's" : "X's"} es el ganador`
-    }
-    winningMessageElement.classList.add('show')
-}
-
-//function for when there is a draw
-function draw() {
-    return [...cellElements].every(cell => {
-        return cell.classList.contains(playerX) || cell.classList.contains(playerO)
-    })
-}
-
-//to place the character on the board
-function placeCharacter (cell, currentClass) {
-    cell.classList.add(currentClass)
-}
-
-//to give turns to each player after the other player has already taken turn
-function swap() {
-    isPlayerO_Turn = !isPlayerO_Turn
+//function to restart the game//
+function startAgain(){
+    strike.className = "strike";
+    gameOverArea.className = "hidden";
+    boardState.fill(null);
+    tiles.forEach((tile) => (tile.innerText = ""));
+    turn = gatoX;
+    hoveringText();
 }

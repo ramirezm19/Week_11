@@ -6,27 +6,58 @@
     <meta name="viewport" content ="width=device-width, initial-scale=1.0">
     <title>Tic Tac Toe Game</title>
     <link rel="stylesheet" href="node_modules/bootstrap/dist/css/bootstrap.css">
-    <link rel="stylesheet" href="tictactoe.css"
+    <link rel="stylesheet" href="tictactoe.css">
 </head>
 <body>
+    <main class="container mt-5"></main>
+        <h1>Juego de Gato - Version Tóxica</h1></br>
 
+        <h3 id="turnSwap">Es el turno de Gato X</h3>
+        </div>
+    </br>
+    
     <!-- Grid for the game -->
-    <div class="ttt-board" id="board">
-        <div class="cell" data-cell></div>
-        <div class="cell" data-cell></div>
-        <div class="cell" data-cell></div>
-        <div class="cell" data-cell></div>
-        <div class="cell" data-cell></div>
-        <div class="cell" data-cell></div>
-        <div class="cell" data-cell></div>
-        <div class="cell" data-cell></div>
-        <div class="cell" data-cell></div>
+    <div class="board mt-5">
+        <div data-index="1" class="tile right-border bottom-border"></div>
+        <div data-index="2" class="tile right-border bottom-border"></div>
+        <div data-index="3" class="tile bottom-border"></div>
+        <div data-index="4" class="tile right-border bottom-border"></div>
+        <div data-index="5" class="tile right-border bottom-border"></div>
+        <div data-index="6" class="tile bottom-border"></div>
+        <div data-index="7" class="tile right-border"></div>
+        <div data-index="8" class="tile right-border"></div>
+        <div data-index="9" class="tile"></div>
+        <div id="strike" class="strike"></div>
     </div>
 
-    <!--winner message -->
-    <div class="winner-message" id="winnerMessage">
-        <div id="winnerMessageText"></div>
-        <button type="button" class="btn btn-secondary" id = "restartButton">Restart</button>
+    </br>
+
+    <main class="container mt-4 align-items-center">
+        <h3>Jugadores</h3>
+            <div class="row mt-4 align-items-center">
+                <div class="col-sm-6">
+                  <div class="card" style="width: 18rem;">
+                    <img src="toxiccatgreen.jpg" class="card-img-top" alt="...">
+                    <div class="card-body text-center">
+                      <h5 class="card-title">Gato X</h5>
+                    </div>
+                  </div>  
+                </div>
+                
+                <div class="col-sm-6">
+                <div class="card" style="width: 18rem;">
+                    <img src="toxiccatred.jpg" class="card-img-top" alt="...">
+                    <div class="card-body text-center">
+                      <h5 class="card-title">Gato O</h5>
+                    </div>
+                  </div>
+                </div>
+            </div>
+
+    <!--winner message-->
+    <div id="game-over-area" class="hidden">
+        <h2 id="game-over-text">El Ganador es X</h2>
+        <button id="play-again">Reiniciar el Juego</button>
     </div>
 
     <script src="node_modules/jquery/dist/jquery.js"></script>
